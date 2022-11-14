@@ -6,13 +6,19 @@ BYTE EndSceneBytes[7]{ 0 };
 tEndScene oEndScene = nullptr;
 extern LPDIRECT3DDEVICE9 pDevice = nullptr;
 
+extern ID3DXFont* FontF = nullptr;
+
+
 // hook function
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 	if (!pDevice)
 		pDevice = o_pDevice;
 
-	DrawFilledRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
+	//DrawFilledRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
 
+	DrawString("Hello World", 100, 100, D3DCOLOR_ARGB(255, 255, 0, 0));
+
+	
 	oEndScene(pDevice);
 }
 
