@@ -8,17 +8,70 @@ extern LPDIRECT3DDEVICE9 pDevice = nullptr;
 
 extern ID3DXFont* FontF = nullptr;
 
+Hack* hack;
+
+bool boneId = false;
+bool DrawBone = false;
+
 
 // hook function
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 	if (!pDevice)
 		pDevice = o_pDevice;
 
+	
 	//DrawFilledRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-	DrawString("Hello World", 100, 100, D3DCOLOR_ARGB(255, 255, 0, 0));
+	//DrawString("Hello World", 100, 100, D3DCOLOR_ARGB(255, 255, 0, 0));
 
-	
+	for (int i = 1; i < 2; i++) {
+		Ent* curEnt = hack->entList->ents[i].ent;
+		if (!hack->CheckValidEnt(curEnt)) {
+			continue;
+		}
+
+		
+		
+		//Vec2 entPos2D;
+		//if (hack->WorldToScreen(curEnt->m_vecOrigin, entPos2D))
+		//{
+		//	DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2 , windowHeight, 2, D3DCOLOR_ARGB(255, 255, 0, 0));
+		//}
+		if(boneId)
+		{
+			for(int x = 0; x < 80; x++)
+			{
+				Vec2 BonePos2D;
+				std::string tmp = std::to_string(x);
+				char const* boneId = tmp.c_str();
+				if (hack->WorldToScreen(hack->GetBonePos(curEnt, x), BonePos2D)) 
+				{
+					DrawString(boneId, BonePos2D.x, BonePos2D.y, D3DCOLOR_ARGB(255, 255, 0, 0));
+				}
+			}
+		}
+		
+		if(DrawBone)
+		{
+			//head
+			hack->DrawBone(curEnt, 8, 0);
+			//left arm
+			hack->DrawBone(curEnt, 7, 39);
+			hack->DrawBone(curEnt, 39, 40);
+			hack->DrawBone(curEnt, 40, 63);
+			//right arm
+			hack->DrawBone(curEnt, 7, 11);
+			hack->DrawBone(curEnt, 11, 12);
+			hack->DrawBone(curEnt, 12, 35);
+			//left leg
+			hack->DrawBone(curEnt, 0, 74);
+			hack->DrawBone(curEnt, 74, 75);
+			//right leg
+			hack->DrawBone(curEnt, 0, 67);
+			hack->DrawBone(curEnt, 67, 68);
+		}
+	}
+
 	oEndScene(pDevice);
 }
 
@@ -32,8 +85,15 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 		oEndScene = (tEndScene)TrampHook((char*)d3d9Device[42], (char*)hkEndScene, 7);
 	}
 
+	hack = new Hack();
+	hack->Init();
+
 	while (!GetAsyncKeyState(VK_END)) {
-		Sleep(1);
+		hack->Update();
+		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+			boneId = !boneId;
+		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+			DrawBone = !DrawBone;
 	}
 
 	//unhook
