@@ -24,7 +24,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
 	//DrawString("Hello World", 100, 100, D3DCOLOR_ARGB(255, 255, 0, 0));
 
-	for (int i = 1; i < 2; i++) {
+	for (int i = 1; i < 16; i++) {
 		Ent* curEnt = hack->entList->ents[i].ent;
 		if (!hack->CheckValidEnt(curEnt)) {
 			continue;
@@ -53,22 +53,45 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		
 		if(DrawBone)
 		{
-			//head
-			hack->DrawBone(curEnt, 8, 0);
-			//left arm
-			hack->DrawBone(curEnt, 7, 39);
-			hack->DrawBone(curEnt, 39, 40);
-			hack->DrawBone(curEnt, 40, 63);
-			//right arm
-			hack->DrawBone(curEnt, 7, 11);
-			hack->DrawBone(curEnt, 11, 12);
-			hack->DrawBone(curEnt, 12, 35);
-			//left leg
-			hack->DrawBone(curEnt, 0, 74);
-			hack->DrawBone(curEnt, 74, 75);
-			//right leg
-			hack->DrawBone(curEnt, 0, 67);
-			hack->DrawBone(curEnt, 67, 68);
+			if(!curEnt->m_bDormant)
+			{
+				//head
+				hack->DrawBone(curEnt, 8, 0);
+				if (curEnt->m_iTeamNum == 2) {
+					//left arm
+					hack->DrawBone(curEnt, 7, 39);
+					hack->DrawBone(curEnt, 39, 40);
+					hack->DrawBone(curEnt, 40, 63);
+					//right arm
+					hack->DrawBone(curEnt, 7, 11);
+					hack->DrawBone(curEnt, 11, 12);
+					hack->DrawBone(curEnt, 12, 35);
+					//left leg
+					hack->DrawBone(curEnt, 0, 74);
+					hack->DrawBone(curEnt, 74, 75);
+					//right leg
+					hack->DrawBone(curEnt, 0, 67);
+					hack->DrawBone(curEnt, 67, 68);
+				}
+				else if (curEnt->m_iTeamNum == 3)
+				{
+					//left arm
+					hack->DrawBone(curEnt, 7, 68);
+					hack->DrawBone(curEnt, 68, 42);
+					hack->DrawBone(curEnt, 42, 65);
+					//right arm
+					hack->DrawBone(curEnt, 7, 38);
+					hack->DrawBone(curEnt, 38, 12);
+					hack->DrawBone(curEnt, 12, 35);
+					//left leg
+					hack->DrawBone(curEnt, 0, 78);
+					hack->DrawBone(curEnt, 78, 79);
+					//right leg
+					hack->DrawBone(curEnt, 0, 71);
+					hack->DrawBone(curEnt, 71, 72);
+				}
+			}
+			
 		}
 	}
 
