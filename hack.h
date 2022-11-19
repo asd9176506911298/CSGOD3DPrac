@@ -5,6 +5,8 @@
 #define MAKE_PAD(size) STR_MERGE(_pad, __COUNTER__)[size]
 #define DEFINE_MEMBER_N(type, name, offset) struct {unsigned char MAKE_PAD(offset); type name;}
 
+#define ABS(x) ((x < 0) ? (-x) : (x))
+
 struct Vec2 {
 	float x, y;
 };
@@ -26,6 +28,8 @@ public:
 		DEFINE_MEMBER_N(Vec3, m_vecOrigin, 0x138);
 		DEFINE_MEMBER_N(int, m_iTeamNum, 0xF4);
 		DEFINE_MEMBER_N(int, m_dwBoneMatrix, 0x26A8);
+		DEFINE_MEMBER_N(Vec3, m_aimPunchAngle, 0x303C);
+		DEFINE_MEMBER_N(int, m_ArmorValue, 0x117CC);
 	};
 };
 
@@ -53,6 +57,9 @@ public:
 
 	ID3DXLine* LineL;
 	ID3DXFont* FontF;
+
+	Vec2 crosshair2D;
+	int crosshairSize = 4;
 
 	void Init();
 	void Update();
