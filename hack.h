@@ -42,14 +42,17 @@ public:
 
 class Hack {
 public:
-	uintptr_t dwEntityList = 0x4DFBE74;
-	uintptr_t dwViewMatrix = 0x4DECCA4;
+	uintptr_t dwEntityList = 0x4DFCE74;
+	uintptr_t dwViewMatrix = 0x4DEDCA4;
 
 	uintptr_t engine;
 	uintptr_t client;
 	Ent* localEnt;
 	EntList* entList;
 	float viewMatrix[16];
+
+	ID3DXLine* LineL;
+	ID3DXFont* FontF;
 
 	void Init();
 	void Update();
