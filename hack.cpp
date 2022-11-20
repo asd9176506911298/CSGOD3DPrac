@@ -1,5 +1,10 @@
 #include "includes.h"
 
+Hack::~Hack() {
+	this->FontF->Release();
+	this->LineL->Release();
+}
+
 void Hack::Init() {
 	client = (uintptr_t)(GetModuleHandle("client.dll"));
 	engine = (uintptr_t)(GetModuleHandle("engine.dll"));
@@ -66,4 +71,12 @@ void Hack::DrawBone(Ent* ent, int boneid1, int boneid2) {
 			DrawLine(Bone1Pos2D, Bone2Pos2D, 2, D3DCOLOR_ARGB(255, 255, 0, 0));
 		}
 	}
+}
+
+Vec3 Hack::TransformVec(Vec3 src, Vec3 ang, float d) {
+	Vec3 newPos;
+	newPos.x = src.x + (cosf(TORAD(ang.y)) * d);
+	newPos.y = src.y + (sinf(TORAD(ang.y)) * d);
+	newPos.z = src.z + (tanf(TORAD(ang.x)) * d);
+	return newPos;
 }

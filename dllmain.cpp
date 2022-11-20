@@ -1,4 +1,6 @@
 #include "includes.h"
+#include <sstream>
+#include <string>
 
 // data
 void* d3d9Device[119];
@@ -34,39 +36,95 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		else
 			color = D3DCOLOR_ARGB(255, 255, 0, 0);
 
+		if(hack->settings.showTeamates && (curEnt->m_iTeamNum == hack->localEnt->m_iTeamNum))
+			continue;
+
 		Vec3 entHead3D = hack->GetBonePos(curEnt, 8);
 		entHead3D.z += 8;
 		Vec2 entPos2D, entHead2D;
 		// snapline
 		if (hack->WorldToScreen(curEnt->m_vecOrigin, entPos2D)){
-			DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2, windowHeight, 2, color);
+			if (hack->settings.velEsp) {
+				Vec3 velOff = curEnt->m_vecOrigin + (curEnt->m_vecVelocity * .25);
+				Vec2 velOff2D;
+
+				if (hack->WorldToScreen(velOff, velOff2D)) {
+					DrawLine(entPos2D, velOff2D, 2, color);
+					DrawFilledRect(velOff2D.x - 2, velOff2D.y - 2, 4, 4, color);
+				}
+			}
+
+			if (hack->settings.snaplines) {
+				DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2, windowHeight, 2, color);
+			}
+				
 			//DrawBox
 			if (hack->WorldToScreen(entHead3D, entHead2D)){
-				DrawEspBox2D(entPos2D, entHead2D, 2, color);
+				if (hack->settings.box2D) {
+					DrawEspBox2D(entPos2D, entHead2D, 2, color);
+				}
 
-				int height = ABS(entPos2D.y - entHead2D.y);
-				int dX = (entPos2D.x - entHead2D.x);
+				if (hack->settings.box3D) {
+					DrawEspBox3D(entHead3D, curEnt->m_vecOrigin, curEnt->m_angEyeAnglesY, 25, 2, color);
+				}
+					
+				if (hack->settings.status2D) {
+					int height = ABS(entPos2D.y - entHead2D.y);
+					int dX = (entPos2D.x - entHead2D.x);
 
-				float healthPerc = curEnt->m_iHealth / 100.f;
-				float armorPerc = curEnt->m_ArmorValue / 100.f;
+					float healthPerc = curEnt->m_iHealth / 100.f;
+					float armorPerc = curEnt->m_ArmorValue / 100.f;
 
-				Vec2 botHealth, topHealth, botArmor, topArmor;
-				int healthHeight = height * healthPerc;
-				int armorHeight = height * armorPerc;
+					Vec2 botHealth, topHealth, botArmor, topArmor;
+					int healthHeight = height * healthPerc;
+					int armorHeight = height * armorPerc;
 
-				botHealth.y = botArmor.y = entPos2D.y;
-				
-				botHealth.x = entPos2D.x - (height / 4) - 2;
-				botArmor.x = entPos2D.x + (height / 4) + 2;
+					botHealth.y = botArmor.y = entPos2D.y;
 
-				topHealth.y = entHead2D.y + height - healthHeight;
-				topArmor.y = entHead2D.y + height - armorHeight;
+					botHealth.x = entPos2D.x - (height / 4) - 2;
+					botArmor.x = entPos2D.x + (height / 4) + 2;
 
-				topHealth.x = entPos2D.x - (height / 4) - 2 - (dX * healthPerc);
-				topArmor.x = entPos2D.x + (height / 4) + 2 - (dX * armorPerc);
-				
-				DrawLine(botHealth, topHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
-				DrawLine(botArmor, topArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+					topHealth.y = entHead2D.y + height - healthHeight;
+					topArmor.y = entHead2D.y + height - armorHeight;
+
+					topHealth.x = entPos2D.x - (height / 4) - 2 - (dX * healthPerc);
+					topArmor.x = entPos2D.x + (height / 4) + 2 - (dX * armorPerc);
+
+					DrawLine(botHealth, topHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
+					DrawLine(botArmor, topArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+				}
+
+				if (hack->settings.headlineEsp) {
+					Vec3 head3D = hack->GetBonePos(curEnt, 8);
+					Vec3 entAngles;
+					entAngles.x = curEnt->m_angEyeAnglesX;
+					entAngles.y = curEnt->m_angEyeAnglesY;
+					entAngles.x = 0;
+					Vec3 entPoint = hack->TransformVec(head3D, entAngles, 60);
+					Vec2 endPoint2d, head2D;
+					hack->WorldToScreen(head3D, head2D);
+					if(hack->WorldToScreen(entPoint, endPoint2d)) {
+						DrawLine(head2D, endPoint2d, 2, color);
+					}
+				}
+
+				if (hack->settings.statusText) {
+					std::stringstream s1, s2;
+					s1 << curEnt->m_iHealth;
+					s2 << curEnt->m_ArmorValue;
+					std::string t1 = "hp: " + s1.str();
+					std::string t2 = "ap: " + s2.str();
+
+					char* healthMsg = (char*)t1.c_str();
+					char* armorMsg = (char*)t2.c_str();
+
+					DrawString(healthMsg, entPos2D.x, entPos2D.y, D3DCOLOR_ARGB(255, 255, 255, 255));
+					DrawString(armorMsg, entPos2D.x, entPos2D.y + 12, D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
+
+				if (curEnt->m_bHasHelmet) {
+					DrawString("has helmet", entPos2D.x, entPos2D.y + 24, D3DCOLOR_ARGB(255, 255, 255, 255));
+				}
 			}
 		}
 
@@ -130,16 +188,19 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		//}
 	}
 
+	if (hack->settings.rcsCrosshair)
+	{
+		Vec2 l, r, t, b;
+		l = r = t = b = hack->crosshair2D;
+		l.x -= hack->crosshairSize;
+		r.x += hack->crosshairSize;
+		b.y += hack->crosshairSize;
+		t.y -= hack->crosshairSize;
 
-	Vec2 l, r, t, b;
-	l = r = t = b = hack->crosshair2D;
-	l.x -= hack->crosshairSize;
-	r.x += hack->crosshairSize;
-	b.y += hack->crosshairSize;
-	t.y -= hack->crosshairSize;
-
-	DrawLine(l, r, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
-	DrawLine(t, b, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		DrawLine(l, r, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		DrawLine(t, b, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
+	
 
 	oEndScene(pDevice);
 }
