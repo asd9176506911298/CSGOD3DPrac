@@ -11,7 +11,7 @@ void DrawString(const char* text, int x, int y, D3DCOLOR color){
 	RECT rect;
 
 	if (!hack->FontF)
-		D3DXCreateFont(pDevice, 24, 0, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &hack->FontF);
+		D3DXCreateFont(pDevice, 24, 0, FW_BOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Microsoft JhengHei", &hack->FontF);
 
 	SetRect(&rect, x + 1, y + 1, x + 1, y + 1);
 	hack->FontF->DrawTextA(NULL, text, -1, &rect, DT_CENTER | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
@@ -51,4 +51,12 @@ void DrawEspBox2D(Vec2 top, Vec2 bot, int thickness, D3DCOLOR color) {
 	DrawLine(bl, br, thickness, color);
 	DrawLine(tl, bl, thickness, color);
 	DrawLine(tr, br, thickness, color);
+}
+
+void DrawBoneString(const char* text, Ent* curEnt, int boneId) {
+	Vec2 BirthdayBonePos2D;
+	if (hack->WorldToScreen(hack->GetBonePos(curEnt, boneId), BirthdayBonePos2D))
+	{
+		DrawString(text, BirthdayBonePos2D.x, BirthdayBonePos2D.y, D3DCOLOR_ARGB(255, 255, 0, 0));
+	}
 }
