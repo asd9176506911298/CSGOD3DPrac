@@ -20,9 +20,28 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		pDevice = o_pDevice;
 
 	
-	DrawFilledRect(25, 25, 100, 100, D3DCOLOR_ARGB(255, 255, 255, 255));
+	DrawString("Yuki.kaco", windowWidth / 2, windowHeight - 20, D3DCOLOR_ARGB(255, 255, 255, 255));
 
-	DrawString("Hello World", 100, 100, D3DCOLOR_ARGB(255, 255, 0, 0));
+	int menuOffX = windowWidth / 2;
+	int menuOffY = 50;
+	D3DCOLOR enable = D3DCOLOR_ARGB(255, 0, 255, 0);
+	D3DCOLOR disbale = D3DCOLOR_ARGB(255, 255, 0, 0);
+
+	if (!hack->settings.showMenu) {
+		DrawString("Show Menu (INS)", menuOffX, menuOffY, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
+	else {
+		DrawString("Show Teamates (F1)", menuOffX, menuOffY + 0 * 12, hack->settings.showTeamates ? enable : disbale);
+		DrawString("Snaplines (F2)", menuOffX, menuOffY + 1 * 12, hack->settings.snaplines ? enable : disbale);
+		DrawString("2D Box (F3)", menuOffX, menuOffY + 2 * 12, hack->settings.box2D ? enable : disbale);
+		DrawString("2D Statusbars (F4)", menuOffX, menuOffY + 3 * 12, hack->settings.status2D ? enable : disbale);
+		DrawString("Status Text (F5)", menuOffX, menuOffY + 4 * 12, hack->settings.status2D ? enable : disbale);
+		DrawString("3D Box (F6)", menuOffX, menuOffY + 5 * 12, hack->settings.box3D ? enable : disbale);
+		DrawString("Velocity Esp (F7)", menuOffX, menuOffY + 6 * 12, hack->settings.velEsp ? enable : disbale);
+		DrawString("Headline Esp (F8)", menuOffX, menuOffY + 7 * 12, hack->settings.headlineEsp ? enable : disbale);
+		DrawString("Recoil crosshair (F9)", menuOffX, menuOffY + 8 * 12, hack->settings.rcsCrosshair? enable : disbale);
+		DrawString("Hide Menu (INS)", menuOffX, menuOffY + 9 * 12, D3DCOLOR_ARGB(255, 255, 255, 255));
+	}
 
 	for (int i = 1; i < 16; i++) {
 		Ent* curEnt = hack->entList->ents[i].ent;
@@ -30,13 +49,21 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			continue;
 		}
 		
-		D3DCOLOR color;
-		if (curEnt->m_iTeamNum == hack->localEnt->m_iTeamNum)
-			color = D3DCOLOR_ARGB(255, 0, 255, 0);
-		else
-			color = D3DCOLOR_ARGB(255, 255, 0, 0);
+		D3DCOLOR espColor, snaplineColor, velocityColor, headlineColor;
+		if (curEnt->m_iTeamNum == hack->localEnt->m_iTeamNum) {
+			espColor = hack->color.team.esp;
+			snaplineColor = hack->color.team.snapline;
+			velocityColor = hack->color.team.velocity;
+			headlineColor = hack->color.team.headline;
+		}
+		else {
+			espColor = hack->color.enemy.esp;
+			snaplineColor = hack->color.enemy.snapline;
+			velocityColor = hack->color.enemy.velocity;
+			headlineColor = hack->color.enemy.headline;
+		}
 
-		if(hack->settings.showTeamates && (curEnt->m_iTeamNum == hack->localEnt->m_iTeamNum))
+		if(!hack->settings.showTeamates && (curEnt->m_iTeamNum == hack->localEnt->m_iTeamNum))
 			continue;
 
 		Vec3 entHead3D = hack->GetBonePos(curEnt, 8);
@@ -49,23 +76,23 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 				Vec2 velOff2D;
 
 				if (hack->WorldToScreen(velOff, velOff2D)) {
-					DrawLine(entPos2D, velOff2D, 2, color);
-					DrawFilledRect(velOff2D.x - 2, velOff2D.y - 2, 4, 4, color);
+					DrawLine(entPos2D, velOff2D, 2, velocityColor);
+					DrawFilledRect(velOff2D.x - 2, velOff2D.y - 2, 4, 4, espColor);
 				}
 			}
 
 			if (hack->settings.snaplines) {
-				DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2, windowHeight, 2, color);
+				DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2, windowHeight, 2, snaplineColor);
 			}
 				
 			//DrawBox
 			if (hack->WorldToScreen(entHead3D, entHead2D)){
 				if (hack->settings.box2D) {
-					DrawEspBox2D(entPos2D, entHead2D, 2, color);
+					DrawEspBox2D(entPos2D, entHead2D, 2, espColor);
 				}
 
 				if (hack->settings.box3D) {
-					DrawEspBox3D(entHead3D, curEnt->m_vecOrigin, curEnt->m_angEyeAnglesY, 25, 2, color);
+					DrawEspBox3D(entHead3D, curEnt->m_vecOrigin, curEnt->m_angEyeAnglesY, 25, 2, espColor);
 				}
 					
 				if (hack->settings.status2D) {
@@ -90,8 +117,8 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					topHealth.x = entPos2D.x - (height / 4) - 2 - (dX * healthPerc);
 					topArmor.x = entPos2D.x + (height / 4) + 2 - (dX * armorPerc);
 
-					DrawLine(botHealth, topHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
-					DrawLine(botArmor, topArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+					DrawLine(botHealth, topHealth, 2, hack->color.health);
+					DrawLine(botArmor, topArmor, 2, hack->color.armor);
 				}
 
 				if (hack->settings.headlineEsp) {
@@ -104,7 +131,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					Vec2 endPoint2d, head2D;
 					hack->WorldToScreen(head3D, head2D);
 					if(hack->WorldToScreen(entPoint, endPoint2d)) {
-						DrawLine(head2D, endPoint2d, 2, color);
+						DrawLine(head2D, endPoint2d, 2, headlineColor);
 					}
 				}
 
@@ -120,11 +147,13 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
 					DrawString(healthMsg, entPos2D.x, entPos2D.y, D3DCOLOR_ARGB(255, 255, 255, 255));
 					DrawString(armorMsg, entPos2D.x, entPos2D.y + 12, D3DCOLOR_ARGB(255, 255, 255, 255));
+
+					if (curEnt->m_bHasHelmet) {
+						DrawString("has helmet", entPos2D.x, entPos2D.y + 24, D3DCOLOR_ARGB(255, 255, 255, 255));
+					}
 				}
 
-				if (curEnt->m_bHasHelmet) {
-					DrawString("has helmet", entPos2D.x, entPos2D.y + 24, D3DCOLOR_ARGB(255, 255, 255, 255));
-				}
+				
 			}
 		}
 
@@ -197,8 +226,8 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		b.y += hack->crosshairSize;
 		t.y -= hack->crosshairSize;
 
-		DrawLine(l, r, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
-		DrawLine(t, b, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+		DrawLine(l, r, 2, hack->color.crosshair);
+		DrawLine(t, b, 2, hack->color.crosshair);
 	}
 	
 
@@ -234,6 +263,8 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 
 	//unhook
 	Patch((BYTE*)d3d9Device[42], EndSceneBytes, 7);
+
+	Sleep(1000);
 
 	// uninject
 	FreeLibraryAndExitThread(hModule, 0);
