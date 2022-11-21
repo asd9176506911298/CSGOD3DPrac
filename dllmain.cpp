@@ -97,9 +97,9 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 				if (hack->settings.headlineEsp) {
 					Vec3 head3D = hack->GetBonePos(curEnt, 8);
 					Vec3 entAngles;
-					entAngles.x = curEnt->m_angEyeAnglesX;
+					entAngles.x = -curEnt->m_angEyeAnglesX;
 					entAngles.y = curEnt->m_angEyeAnglesY;
-					entAngles.x = 0;
+					entAngles.z = 0;
 					Vec3 entPoint = hack->TransformVec(head3D, entAngles, 60);
 					Vec2 endPoint2d, head2D;
 					hack->WorldToScreen(head3D, head2D);
